@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Database Site</title>
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+</head>
+<body>
+    <h1>My Database Site</h1>
+    
+    <div>
+        <input type="text" id="messageInput" placeholder="Enter message">
+        <button onclick="addMessage()">Add to DB</button>
+    </div>
+    
+    <div id="messages"></div>
+
+    <script>
+        // Initialize Supabase (REPLACE with your actual keys)
+        const supabaseUrl = 'https://your-project.supabase.co';
+        const supabaseKey = 'your-public-anon-key';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Function to add data
+        async function addMessage() {
+            const message = document.getElementById('messageInput').value;
+            
+            const { data, error } = await supabase
+                .from('messages')
+                .insert([{ text: message }]);
+            
+            if (!error) {
+                alert('Message saved!');
+                loadMessages();
+            }
+        }
+
+        // Function to load data
+        async function loadMessages() {
+            const { data, error } = await supabase
+                .from('messages')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (!error) {
+                const container = document.getElementById('messages');
+                container.innerHTML = data.map(msg => 
+                    `<p>${msg.text} (${new Date(msg.created_at).toLocaleString()})</p>`
+                ).join('');
+            }
+        }
+
+        // Load messages on page load
+        loadMessages();
+    </script>
+</body>
+</html>
